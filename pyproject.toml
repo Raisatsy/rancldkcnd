@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "ran"
+version = "0.1.0"
+description = ""
+authors = ["Daniil <shebanko@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.14"
+fastapi = "^0.129.0"
+sqlalchemy = "^2.0.46"
+pydantic-settings = "^2.13.0"
+dishka = "^1.8.0"
+alembic = "^1.18.4"
+asyncpg = "^0.31.0"
+psycopg2-binary = "^2.9.11"
+uvicorn = "^0.41.0"
+mypy = ">=1.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
