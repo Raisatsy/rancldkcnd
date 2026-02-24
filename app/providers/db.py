@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.core.config import Settings
-from app.core.db import create_engine, create_async_sessionmaker, create_session
+from app.core.db import create_engine, create_async_sessionmaker
 
 
 class DbProvider(Provider):
@@ -22,5 +22,8 @@ class DbProvider(Provider):
         return create_async_sessionmaker(engine=engine)
 
     @provide(scope=Scope.REQUEST)
-    async def get_session(self, sessionmaker: async_sessionmaker[AsyncSession]) -> AsyncIterable[AsyncSession]:
-        return create_session(sessionmaker=sessionmaker)
+    async def get_session(
+        self, sessionmaker: async_sessionmaker[AsyncSession]
+    ) -> AsyncIterable[AsyncSession]:
+        async with sessionmaker() as session:
+            yield session
