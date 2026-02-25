@@ -1,6 +1,8 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Depends
+from starlette import status
+from starlette.responses import Response
 
 from app.schemas.base import PaginatedResponse, PaginationParams
 from app.schemas.operator import OperatorCreate, OperatorRead, OperatorUpdate
@@ -29,4 +31,5 @@ async def update_operator_by_id(id: int, operator_update: OperatorUpdate, operat
 
 @router.delete("/{id}")
 async def delete_operator_by_id(id: int, operator_service: FromDishka[OperatorService]):
-    return await operator_service.delete(id=id)
+    await operator_service.delete(id=id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

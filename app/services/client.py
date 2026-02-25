@@ -25,13 +25,13 @@ class ClientService:
         return client_read
 
     async def update(self, id: int, client_data: ClientUpdate) -> ClientRead:
-        logger.info(f"Update client: {id} with {client_data}")
-        client = await self.client_repo.get_by_id(id)
-        if client is None:
-            raise ClientNotFound(id=id)
+        logger.info(f"Update client id={id} with {client_data}")
+
 
         data_update = client_data.model_dump(exclude_unset=True)
-        client = await self.client_repo.update(id=client.id, values=data_update)
+        client = await self.client_repo.update(id=id, values=data_update)
+        if client is None:
+            raise ClientNotFound(id=id)
 
         await self.client_repo.session.commit()
 
@@ -56,9 +56,9 @@ class ClientService:
 
     async def delete(self, id: int):
         logger.info(f"Delete client: {id}")
-        client = await self.client_repo.get_by_id(id=id)
+        data_delete = {"is_active": False}
+        client = await self.client_repo.update(id=id, values=data_delete)
         if client is None:
             raise ClientNotFound(id=id)
-        await self.client_repo.delete(client=client)
         await self.client_repo.session.commit()
 

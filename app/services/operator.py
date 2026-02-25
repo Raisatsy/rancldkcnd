@@ -31,13 +31,13 @@ class OperatorService:
         return operator_read
 
     async def update(self, id: int, operator_data: OperatorUpdate) -> OperatorRead:
-        logger.info(f"Update operator by: {id} with {operator_data}")
-        operator = await self.operator_repo.get_by_id(id)
+        logger.info(f"Update operator id={id} with {operator_data}")
+        data_update = operator_data.model_dump(exclude_unset=True)
+        operator = await self.operator_repo.update(id=id, values=data_update)
         if operator is None:
             raise OperatorNotFound(id=id)
 
-        data_update = operator_data.model_dump(exclude_unset=True)
-        operator = await self.operator_repo.update(id=id, values=data_update)
+
         await self.operator_repo.session.commit()
 
         operator_read = OperatorRead.model_validate(operator)
@@ -51,7 +51,8 @@ class OperatorService:
 
     async def delete(self, id: int):
         logger.info(f"Delete operator: {id}")
-        operator = await self.operator_repo.get_by_id(id=id)
+        data_delete = {"is_active": False}
+        operator = await self.operator_repo.update(id=id, values=data_delete)
         if operator is None:
             raise OperatorNotFound(id=id)
-        await self.operator_repo.delete(operator=operator)
+        await self.operator_repo.session.commit()

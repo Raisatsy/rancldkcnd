@@ -14,5 +14,6 @@ class ClientRead(BaseModel):
     id: int
     name: str
     surname: str
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

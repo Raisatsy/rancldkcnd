@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repo.client import ClientRepo
 from app.repo.operator import OperatorRepo
+from app.repo.ticket import TicketRepo
 
 
 class RepoProvider(Provider):
@@ -14,3 +15,7 @@ class RepoProvider(Provider):
     @provide(scope=Scope.REQUEST)
     def get_operator_repo(self, session: AsyncSession) -> OperatorRepo:
         return OperatorRepo(session=session)
+
+    @provide(scope=Scope.REQUEST)
+    def get_ticket_repo(self, session: AsyncSession) -> TicketRepo:
+        return TicketRepo(session=session)
