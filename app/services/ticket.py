@@ -58,17 +58,35 @@ class TicketService:
             ticket_update = ticket_data.model_dump(exclude_unset=True)
             ticket = await self.ticket_repo.update(id=id, values=ticket_update)
 
-            if (old_operator_id is not None
-            and old_status in [TicketStatus.IN_PROGRESS, TicketStatus.WAITING]
-            and ticket.status in [TicketStatus.RESOLVED, TicketStatus.CLOSED]):
-                next_ticket = await self.ticket_repo.get_next_from_queue()
-                if next_ticket is not None:
-                    logger.info(f"Get new ticket={next_ticket.id} to operator_id={old_operator_id}")
-                    await self.ticket_repo.update(id=next_ticket.id, values={"operator_id": old_operator_id, "ticket_status": TicketStatus.IN_PROGRESS})
+            await self._assign_next_ticket_to_operator(old_status=old_status, old_operator_id=old_operator_id, updated_ticket=ticket)
 
         ticket_read = TicketRead.model_validate(ticket)
         logger.info(f"Updated ticket ticket_read={ticket_read}")
         return ticket_read
 
+
+    async def _assign_next_ticket_to_operator(
+        self,
+        old_status: TicketStatus,
+        old_operator_id: int | None,
+        updated_ticket: Ticket,
+    ) -> None:
+        if (
+            old_operator_id is not None
+            and old_status in [TicketStatus.IN_PROGRESS, TicketStatus.WAITING]
+            and updated_ticket.status in [TicketStatus.RESOLVED, TicketStatus.CLOSED]
+        ):
+            next_ticket = await self.ticket_repo.get_next_from_queue()
+            if next_ticket is not None:
+                logger.info(
+                    f"Get new ticket={next_ticket.id} to operator_id={old_operator_id}"
+                )
+                await self.ticket_repo.update(
+                    id=next_ticket.id,
+                    values={
+                        "operator_id": old_operator_id,
+                        "ticket_status": TicketStatus.IN_PROGRESS,
+                    },
+                )
 
 
