@@ -4,6 +4,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Ticket
+from app.models.enum import TicketStatus
 
 
 @dataclass
@@ -34,3 +35,20 @@ class TicketRepo:
         )
         result = await self.session.execute(query)
         return result.scalar_one()
+
+    async def get_next_from_queue(self) -> Ticket | None:
+        query = (
+            select(Ticket)
+            .where(
+                Ticket.status == TicketStatus.NEW,
+                Ticket.operator_id.is_(None),
+            )
+            .order_by(
+                Ticket.priority.desc(),
+                Ticket.created_at.asc(),
+            )
+            .limit(1)
+            .with_for_update(skip_locked=True)
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
